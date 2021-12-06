@@ -56,7 +56,12 @@ function listarMisCitas(req,res) {
 }
 
 function listarMiAgenda(req, res) {
-    Cita.find({ idDoctor: req.params.idDoctor, fecha: { $gte: req.params.date} })
+    const date = new Date(req.params.date)
+    const lteDate = new Date(date).setHours(date.getHours() + 17)
+    
+    Cita.find({ idDoctor: req.params.idDoctor, fecha: { 
+        $gte: req.params.date, $lte: lteDate
+    }})
     .populate([
         { 
             path: 'idConsultorio', 
