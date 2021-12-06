@@ -1,42 +1,31 @@
-const citas = [
-    {
-        empieza: 8,
-        finaliza: 9
-    },
-    {
-        empieza: 11,
-        finaliza: 12
-    },
-] 
+const express = require('express');
+const cors = require('cors');
+const bodyparser = require("body-parser");
+const logger = require("morgan");
+const { dbConnection } = require('./db/config');
+require('dotenv').config();
 
-const horarios = [
-    {
-        empieza: 8,
-        finaliza: 9
-    },
-    {
-        empieza: 9,
-        finaliza: 10
-    },
-    {
-        empieza: 10,
-        finaliza: 11
-    },
-    {
-        empieza: 11,
-        finaliza: 12
-    },
-]
+// Crear el servidor/aplicación de express
+const app = express();
 
-const verificarHorario = (horario, citass) => {
-    for (let c of citass) {
-        if (c.empieza === horario.empieza) {
-            return false
-        }
-    }
-    return true    
-}
+// Base de datos
+dbConnection();
 
-const result = horarios.filter(h => verificarHorario(h, citas))
+app.use(bodyparser.urlencoded({ extended: true }));
+app.use(logger("dev"));
+// Directorio Público
+app.use( express.static('public') );
+// CORS
+app.use( cors() );
+// Lectura y parseo del body
+app.use( express.json() );
+// Rutas
+app.use( '/api/auth', require('./routes/auth') );
+app.use("/api", require("./routes/citas"));
+app.use("/api", require("./routes/consultorio"));
+app.use("/api", require("./routes/centro-salud"));
 
-console.log(result)
+
+app.listen( process.env.PORT, () => {
+    console.log(`Servidor corriendo en puerto ${ process.env.PORT }`);
+});

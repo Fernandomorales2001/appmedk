@@ -30,8 +30,9 @@ async function listarHorarios(req, res) {
     const { horarios, idDoctor } = await Consultorio.findById(req.params.id)
                                          .select({ horarios: 1, idDoctor: 1, _id: 0 })
     const citas = await Cita.find({ fecha: req.params.fecha })
+    
     if (citas.length <= 0) {
-        res.status(200).send(horarios)
+        res.status(200).send({data: { horarios, idDoctor } })
         return
     }
 

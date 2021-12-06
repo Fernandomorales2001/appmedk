@@ -1,5 +1,5 @@
 //Creacion de variable para el modelo de usuario y bcrypt node.js
-var User = require('../models/login');
+var User = require('../models/Usuario');
 var Bcrypt = require('bcrypt-nodejs');
 
 //Importamos el jwt de los helpers

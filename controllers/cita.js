@@ -37,7 +37,7 @@ function listarMisCitas(req,res) {
         {
             path: "idDoctor",
             model: "user",
-            select: { _id: 0, nombres: 1, apellidos: 1 }
+            select: { _id: 0, name: 1 }
         }
     ])
     .select(
@@ -73,7 +73,7 @@ function listarMiAgenda(req, res) {
         {
             path: "idUser",
             model: "user",
-            select: { _id: 0, nombres: 1, apellidos: 1 }
+            select: { _id: 0, name: 1 }
         }
     ])
     .select({

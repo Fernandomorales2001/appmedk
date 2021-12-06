@@ -1,23 +1,23 @@
-var jwt = require('jwt-simple');
-var moment = require('moment');
-var secret = 'heidyjackseni';
+const jwt = require('jsonwebtoken');
 
-//Esta funcion me mandara por parametro lo siguiente
-//Pasamos el usuario que hemos logeado
-exports.createToken = function(user) {
-//Dentro de la variable payload vamos a mandar todos los datos del usuario    
-    var payload = {
-        sub: user._id,
-        nombres: user.nombres,
-        apellidos: user.apellidos,
-        email: user.email,
-        role: user.role,
-        iat: moment().unix(),
-        exp: moment().add(30,'days').unix(),
-    }
-
-    //Vamos a codificar todos estos datos y obtendremos un token
-    return jwt.encode(payload,secret);
+const generarJWT = ( uid, name ) => {
+    const payload = { uid, name };
+    return new Promise( (resolve, reject) => {
+        jwt.sign( payload, process.env.SECRET_JWT_SEED, {
+            expiresIn: '24h'
+        }, (err, token) => {
+            if ( err ) {
+                // TODO MAL
+                console.log(err);
+                reject(err);
+            } else {
+                // TODO BIEN
+                resolve( token )
+            }
+        })
+    });
 }
 
-//El unix es para obtener la fecha en tipo timestamp
+module.exports = {
+    generarJWT
+} 
