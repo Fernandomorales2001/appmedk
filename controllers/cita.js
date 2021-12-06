@@ -3,10 +3,7 @@ var Cita = require('../models/citas');
 function registrar(req,res) {
     //Variable que verificara si se mandan los datos, por ejemplo: titulo, descripcion o datos de texto
     var data = req.body;
-    var cita = new Cita();
-    cita.observacion = data.observacion;
-    cita.email = data.email;
-    cita.idUser = data.idUser;
+    var cita = new Cita(data);
 
     //Vamos actualizarlo
     cita.save((err,cita_save)=>{
@@ -14,7 +11,7 @@ function registrar(req,res) {
             res.status(500).send({message: 'Error en el servidor'});
         }else{
             if (cita_save) {
-                res.status(200).send({cita: cita_save});  
+                res.status(200).send({data: cita_save});  
             }else{
                 res.status(403).send({message: 'No se registro la cita'});
             }
@@ -22,23 +19,74 @@ function registrar(req,res) {
     });
 }
 
-function listar(req,res) {
-    //Vamos a obtener la variable titulo creada en las rutas
-    var observacion = req.params['observacion'];
-
-    //Consulta para poder listar todos las observaciones por su titulo
-    Cita.find({observacion: new RegExp(observacion,'i')},(err,cita_listado)=>{
-        if (err) {
-            res.status(500).send({message: 'Server Error'});
-        } else {
-            if (cita_listado) {
-                res.status(200).send({observaciones: cita_listado});
-            }
-            else{
-                res.status(403).send({message: 'No hay ningun registro con ese titulo'});
-            }
+function listarMisCitas(req,res) {
+    Cita.find({ idUser: req.params.idUser })
+    .populate([
+        { 
+            path: 'idConsultorio', 
+            model: 'Consultorio',
+            select: { indicaciones: 1, numeroConsultorio: 1, idCentroSalud: 1, _id: 0 },
+            populate: [
+                {
+                    path: "idCentroSalud",
+                    model: 'centroSalud',
+                    select: { ubicacion: 1, nombre: 1, _id: 0 }
+                },
+            ],
+        }, 
+        {
+            path: "idDoctor",
+            model: "user",
+            select: { _id: 0, nombres: 1, apellidos: 1 }
         }
-    });
+    ])
+    .select(
+        {
+            fecha: 1,
+            empieza: 1,
+            finaliza: 1,
+            idConsultorio: 1,
+            idDoctor: 1
+        }
+    )
+    .exec((err, citas_listado) => {
+        if (err) throw err
+        res.status(200).send(citas_listado)
+    })
+}
+
+function listarMiAgenda(req, res) {
+    Cita.find({ idDoctor: req.params.idDoctor, fecha: { $gte: req.params.date} })
+    .populate([
+        { 
+            path: 'idConsultorio', 
+            model: 'Consultorio',
+            select: { indicaciones: 1, numeroConsultorio: 1, idCentroSalud: 1, _id: 0 },
+            populate: [
+                {
+                    path: "idCentroSalud",
+                    model: 'centroSalud',
+                    select: { ubicacion: 1, nombre: 1, _id: 0 }
+                },
+            ],
+        },
+        {
+            path: "idUser",
+            model: "user",
+            select: { _id: 0, nombres: 1, apellidos: 1 }
+        }
+    ])
+    .select({
+        fecha: 1,
+        tipo: 1,
+        empieza: 1,
+        finaliza: 1,
+        idConsultorio: 1
+    })
+    .exec((err, citas_listado) => {
+        if (err) throw err
+        res.status(200).send(citas_listado)
+    })
 }
 
 function obtener_cita(req,res) {
@@ -97,7 +145,8 @@ function eliminar(req,res) {
 
 module.exports = {
     registrar,
-    listar,
+    listarMisCitas,
+    listarMiAgenda,
     editar,
     obtener_cita,
     eliminar
