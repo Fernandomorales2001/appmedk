@@ -24,7 +24,7 @@ app.use( '/api/auth', require('./routes/auth') );
 app.use("/api", require("./routes/citas"));
 app.use("/api", require("./routes/consultorio"));
 app.use("/api", require("./routes/centro-salud"));
-
+app.use("/api", require("./routes/correoRoutes"));
 
 app.listen( process.env.PORT, () => {
     console.log(`Servidor corriendo en puerto ${ process.env.PORT }`);
