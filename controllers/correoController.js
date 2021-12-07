@@ -1,34 +1,43 @@
-const { response, request } =  require('express');
 const nodeMailer = require('nodemailer');
+const Citas = require('../models/citas')
 
-const envioCorreo = (req = request, res = response)=>{
-    let body = req.body;
+const envioCorreo = async () => {
+    const date = new Date()
+
+    const citas = await Citas.find({ fecha: { $gte: date}})
+    .populate({ path: "idUser", model: "user", select: { email: 1, _id: 0, name:1 }})
+    .select({ _id: 0, idUser: 1, fecha: 1, empieza: 1, finaliza: 1 })
 
     let config = nodeMailer.createTransport({
         host: 'smtp.gmail.com',
         post: 587,
         auth:{
-            user: 'fmsepeda2001@gmail.com',
-            pass: 'Software2021'
+            user: 'appmedk@gmail.com',
+            pass: 'appmedk1234'
         }
     });
 
-    const opciones = {
-        from: 'Fernando Morales',
-        subject: body.asunto,
-        to: body.email,
-        text: body.mensaje
-    };
+    const getDateFormat = (fecha) => {
+        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        return new Date(fecha).toLocaleDateString("es-HN", dateOptions)
+    }
 
-    config.sendMail(opciones,function(error,result) {
+    for (const cita of citas) {
+        const message = `Estimado ${cita.idUser.name} este correo es para recordarle que tiene una cita agendada para el dia ${getDateFormat(cita.fecha)}, de ${cita.empieza} a ${cita.finaliza}. Para mas informacion visite el sitio web en la seccion de mis citas`
 
-        if (error) return res.json({ok:false,msg:error});
+        const opciones = {
+            from: 'appmedk@gmail.com',
+            subject: "Recordatorio de cita",
+            to: cita.idUser.email,
+            text: message
+        };
 
-        return resp.json({
-            ok:true,
-            msg:result
+        config.sendMail(opciones,function(error,result) {
+            if (error) return console.log(error)
+            console.log(result)
         })
-    })
+    }
+    
 }
 
 module.exports = {

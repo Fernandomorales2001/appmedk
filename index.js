@@ -4,6 +4,13 @@ const bodyparser = require("body-parser");
 const logger = require("morgan");
 const { dbConnection } = require('./db/config');
 require('dotenv').config();
+const cron = require('node-cron');
+const { envioCorreo } = require('./controllers/correoController');
+
+//para enviar cada minuto '* * * * *'
+cron.schedule('* * * * 1-7', () => {
+    envioCorreo()
+});
 
 // Crear el servidor/aplicación de express
 const app = express();
