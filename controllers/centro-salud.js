@@ -30,8 +30,17 @@ async function listarCentrosYDoctores(req, res) {
     res.status(200).send(data);
 }
 
+function eliminarCentroSaludPorId(req, res) {
+    CentroSalud.findByIdAndDelete(req.params.id, (err, result) => {
+        if(err) return res.status(500).send(err)
+
+        res.status(200).send(true)
+    })
+}
+
 module.exports = {
     registrar,
     listar,
-    listarCentrosYDoctores
+    listarCentrosYDoctores,
+    eliminarCentroSaludPorId
 }

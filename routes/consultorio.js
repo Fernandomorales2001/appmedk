@@ -9,5 +9,6 @@ api.get('/consultorio/horarios/:id/:fecha',consultorioController.listarHorarios)
 api.get('/consultorio/doctor/:doctorId',consultorioController.listarConsultoriosPorDoctorId);
 api.get('/consultorio/porId/:id',consultorioController.listarConsultorioPorId);
 api.put('/consultorio/:id',consultorioController.editarConsultorioPorId);
+api.delete('/consultorio/:id',consultorioController.eliminarConsultorioPorId);
 
 module.exports = api;

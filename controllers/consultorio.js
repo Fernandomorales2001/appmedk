@@ -29,7 +29,7 @@ function listar(req,res) {
 async function listarHorarios(req, res) {
     const { horarios, idDoctor } = await Consultorio.findById(req.params.id)
                                          .select({ horarios: 1, idDoctor: 1, _id: 0 })
-    const citas = await Cita.find({ fecha: req.params.fecha })
+    const citas = await Cita.find({ fecha: req.params.fecha, idConsultorio: req.params.id })
     
     if (citas.length <= 0) {
         res.status(200).send({data: { horarios, idDoctor } })
@@ -81,11 +81,20 @@ function editarConsultorioPorId(req,res) {
     }) 
 }
 
+function eliminarConsultorioPorId(req, res) {
+    Consultorio.findByIdAndDelete(req.params.id, (err, result) => {
+        if(err) return res.status(500).send(err)
+
+        res.status(200).send(true)
+    })
+}
+
 module.exports = {
     registrar,
     listar,
     listarHorarios,
     listarConsultoriosPorDoctorId,
     listarConsultorioPorId,
-    editarConsultorioPorId
+    editarConsultorioPorId,
+    eliminarConsultorioPorId
 }
