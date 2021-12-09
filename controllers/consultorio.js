@@ -81,12 +81,17 @@ function editarConsultorioPorId(req,res) {
     }) 
 }
 
-function eliminarConsultorioPorId(req, res) {
-    Consultorio.findByIdAndDelete(req.params.id, (err, result) => {
+async function eliminarConsultorioPorId(req, res) {
+    await Consultorio.findByIdAndDelete(req.params.id,  (err, consultorios) => {
         if(err) return res.status(500).send(err)
-
-        res.status(200).send(true)
-    })
+        
+        Cita.deleteMany({ idConsultorio: req.params.id })
+            .exec((err, result2) => {
+                if (err)
+                    return res.status(500).send(err);
+                return res.status(200).send(true);
+        })
+    }).clone().catch(function(err){ console.log(err)})
 }
 
 module.exports = {

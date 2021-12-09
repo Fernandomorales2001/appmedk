@@ -1,5 +1,7 @@
 const CentroSalud = require('../models/centro-salud');
+const Citas = require('../models/citas');
 const User = require('../models/Usuario');
+const Consultorio = require('../models/consultorio');
 
 function registrar(req,res) {
     var params = req.body;
@@ -30,12 +32,24 @@ async function listarCentrosYDoctores(req, res) {
     res.status(200).send(data);
 }
 
-function eliminarCentroSaludPorId(req, res) {
-    CentroSalud.findByIdAndDelete(req.params.id, (err, result) => {
+async function eliminarCentroSaludPorId(req, res) {
+    await CentroSalud.findByIdAndDelete(req.params.id, async (err, result) => {
         if(err) return res.status(500).send(err)
 
-        res.status(200).send(true)
-    })
+        let consultorios = await Consultorio.find({ idCentroSalud: req.params.id })
+        for (const c of consultorios) {
+            Citas.deleteMany({ idConsultorio: c._id })
+            .exec((err, result2) => {
+                if (err) return res.status(500).send(err);
+            });
+        }
+
+        Consultorio.deleteMany({ idCentroSalud: req.params.id })
+            .exec((err2, resultcount) => {
+                if (err) return res.status(500).send(err2);
+                return res.status(200).send(true);
+            })
+        }).clone().catch(function(err){ console.log(err)})
 }
 
 module.exports = {
